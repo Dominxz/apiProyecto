@@ -160,4 +160,63 @@ export const deleteUsuarios = async (req, res) => {
         }
         return res.status(500).json({ message: "error en el servidor" })
     }
+
+    
 }
+
+
+// === LOGIN DE USUARIOS ===
+export const loginUsuario = async (req, res) => {
+  try {
+    const { usr_usuario, usr_clave } = req.body;
+
+    if (!usr_usuario || !usr_clave) {
+      return res.status(400).json({ message: "Debe enviar usuario y clave" });
+    }
+
+    // Busca al usuario en la BD
+    const [result] = await conmysql.query(
+      'SELECT * FROM usuarios WHERE usr_usuario = ?',
+      [usr_usuario]
+    );
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const usuario = result[0];
+
+    // Si tus contraseñas están en texto plano:
+    if (usuario.usr_clave !== usr_clave) {
+      return res.status(401).json({ message: "Clave incorrecta" });
+    }
+
+    // Si las guardas cifradas con bcrypt:
+    // const validPassword = await bcrypt.compare(usr_clave, usuario.usr_clave);
+    // if (!validPassword) return res.status(401).json({ message: "Clave incorrecta" });
+
+    // Genera el token
+    const token = jwt.sign(
+      {
+        id: usuario.usr_id,
+        nombre: usuario.usr_nombre,
+        usuario: usuario.usr_usuario,
+      },
+      secret,
+      { expiresIn: '2h' }
+    );
+
+    res.json({
+      message: "Login exitoso",
+      token,
+      usuario: {
+        id: usuario.usr_id,
+        nombre: usuario.usr_nombre,
+        usuario: usuario.usr_usuario,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+};
