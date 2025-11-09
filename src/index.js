@@ -1,5 +1,9 @@
-import app from './app.js'
-import{PORT} from './config.js'
+import app from './app.js';
+import { PORT } from './config.js';
 
-app.listen(PORT);//3000
-console.log('el servidor esta escuchando por el puesto:',PORT)
+// Render te da un puerto dinámico, por eso se usa process.env.PORT
+const port = process.env.PORT || PORT || 3000;
+
+app.listen(port, () => {
+  console.log('✅ El servidor está escuchando en el puerto:', port);
+});
