@@ -7,4 +7,5 @@ export const BD_USER=process.env.BD_USER ||'ucmwltyqvkfigzbx'
 export const BD_PASSWORD=process.env.BD_PASSWORD || 'HWjaWAe4Zd2lDB7D2hWIKFlDvH0'
 export const BD_PORT=process.env.BD_PORT || 3306
 export const PORT=process.env.PORT || 3000
+
 export const CLOUDINARY_URL = process.env.CLOUDINARY_URL;
