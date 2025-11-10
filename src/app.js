@@ -14,8 +14,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 const corsOption = {
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  origin: ['http://localhost:8100', 'capacitor://localhost'],
+  methods: ['GET','POST','PUT','PATCH','DELETE'],
   credentials: true
 };
 app.use(cors(corsOption));
