@@ -1,8 +1,6 @@
 import { conmysql } from '../db.js';
 import jwt from 'jsonwebtoken';
 import cloudinary from '../config/cloudinary.js';
-import fs from 'fs';
-import path from 'path';
 
 const secret = process.env.SECRET;
 
@@ -74,19 +72,22 @@ export const postProductos = async (req, res) => {
 
     // Verificar si el código ya existe
     const [fila] = await conmysql.query('SELECT prod_codigo FROM productos WHERE prod_codigo = ?', [prod_codigo]);
-    if (fila.length > 0) {
-      if (req.file) fs.unlink(req.file.path, () => {}); // eliminar archivo temporal
-      return res.status(400).json({ message: 'Producto con código ' + prod_codigo + ' ya registrado' });
-    }
+    if (fila.length > 0) return res.status(400).json({ message: 'Producto con código ' + prod_codigo + ' ya registrado' });
 
     // Subir imagen a Cloudinary si existe
     let prod_imagen = null;
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, { folder: 'productos' });
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'productos' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
       prod_imagen = result.secure_url;
-
-      // Eliminar archivo temporal
-      fs.unlink(req.file.path, (err) => { if (err) console.error(err); });
     }
 
     const [result] = await conmysql.query(
@@ -102,7 +103,6 @@ export const postProductos = async (req, res) => {
 
   } catch (error) {
     console.error('Error en postProductos:', error);
-    if (req.file) fs.unlink(req.file.path, () => {}); // limpiar temporal
     return res.status(500).json({ message: "error en el servidor", error: error.message });
   }
 };
@@ -129,11 +129,17 @@ export const putProductos = async (req, res) => {
 
     // Subir nueva imagen si viene
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, { folder: 'productos' });
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'productos' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
       prod_imagen = result.secure_url;
-
-      // Eliminar archivo temporal
-      fs.unlink(req.file.path, (err) => { if (err) console.error(err); });
     }
 
     const [result] = await conmysql.query(
@@ -151,7 +157,6 @@ export const putProductos = async (req, res) => {
 
   } catch (error) {
     console.error('Error en putProductos:', error);
-    if (req.file) fs.unlink(req.file.path, () => {}); // limpiar temporal
     return res.status(500).json({ message: "error en el servidor", error: error.message });
   }
 };
