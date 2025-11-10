@@ -1,7 +1,6 @@
 import { conmysql } from '../db.js';
 import jwt from 'jsonwebtoken';
-import cloudinary from '../config/cloudinary.js';
-
+import cloudinary from '../cloudinary.js';
 const secret = process.env.SECRET;
 
 // ---------------------
