@@ -1,36 +1,38 @@
-import express from 'express'
-import cors from 'cors'
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import productosRoutes from './rutas/productosroutes.js';
 
-// importar las rutas OJO
-import clientesRoutes from './routes/clientes.routes.js'
-import productosRoutes from './routes/productos.routes.js'
-import usuariosRoutes from './routes/usuarios.routes.js'
-import pedidosRoutes from './routes/pedidos.routes.js'
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// 👇 Aumentamos el límite de tamaño permitido en el body
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-const corsOption = {
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+app.use(cors({
+  origin: 'http://localhost:8100',
   credentials: true
-};
-app.use(cors(corsOption));
+}));
 
-// indicar las rutas a utilizar OJO
-app.use('/api', clientesRoutes);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ✅ Servir archivos desde src/uploads/
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/api', productosRoutes);
-app.use('/api', usuariosRoutes);
-app.use('/api', pedidosRoutes);
 
-// manejo de rutas no encontradas
-app.use((req, resp, next) => {
-  resp.status(400).json({
-    message: 'Endpoint not found'
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'API funcionando',
+    uploads: `${req.protocol}://${req.get('host')}/uploads`
   });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Servidor en http://localhost:${PORT}`);
+  console.log(`📁 Uploads en http://localhost:${PORT}/uploads`);
 });
 
 export default app;
