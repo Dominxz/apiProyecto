@@ -21,7 +21,8 @@ const corsOptions = {
       'https://apiproyecto20252.onrender.com',
       'http://localhost:8100', // Ionic local
       'capacitor://localhost', // App Android/iOS
-      'http://localhost'       // WebView Android
+      'http://localhost',      // WebView Android
+      'https://localhost'
     ];
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
